@@ -16,6 +16,10 @@ const ACTION_SETTINGS      = '$(gear) Open Settings';
 const ACTION_PORTAL        = '$(link-external) Open portal';
 const ACTION_TOGGLE_METRIC = '$(arrow-swap) Toggle Vibe / Billing';
 const ACTION_TOGGLE_EXTRAS = '$(eye) Toggle extra windows';
+const ACTION_SET_TOKEN     = '$(key) Set OAuth token';
+const ACTION_REFRESH_TOKEN = '$(sync) Refresh token';
+const ACTION_SET_COOKIE    = '$(key) Set admin cookie';
+const ACTION_SET_API_KEY   = '$(key) Set API key';
 
 export async function showProviderDetail(
   providerId: string,
@@ -36,6 +40,7 @@ export async function showProviderDetail(
   const ACTION_LABELS = new Set([
     ACTION_REFRESH, ACTION_SETTINGS, ACTION_PORTAL,
     ACTION_TOGGLE_METRIC, ACTION_TOGGLE_EXTRAS,
+    ACTION_SET_TOKEN, ACTION_REFRESH_TOKEN, ACTION_SET_COOKIE, ACTION_SET_API_KEY,
   ]);
 
   const items: vscode.QuickPickItem[] = [];
@@ -104,6 +109,10 @@ export async function showProviderDetail(
       description: `billing row: ${showBilling ? 'visible' : 'hidden'}`,
       alwaysShow: true,
     });
+    items.push({ label: ACTION_SET_COOKIE, description: 'paste Cookie header from console.mistral.ai', alwaysShow: true });
+  }
+  if (providerId === 'deepseek') {
+    items.push({ label: ACTION_SET_API_KEY, description: 'paste API key from platform.deepseek.com', alwaysShow: true });
   }
   if (providerId === 'claude') {
     items.push({
@@ -111,6 +120,10 @@ export async function showProviderDetail(
       description: `extra windows: ${showExtras ? 'visible' : 'hidden'}`,
       alwaysShow: true,
     });
+  }
+  if (providerId === 'antigravity') {
+    items.push({ label: ACTION_REFRESH_TOKEN, description: 'force refresh via antigravity-usage credentials', alwaysShow: true });
+    items.push({ label: ACTION_SET_TOKEN, description: 'paste Google OAuth access token manually', alwaysShow: true });
   }
 
   if (PORTAL_URLS[providerId]) {
@@ -151,6 +164,14 @@ export async function showProviderDetail(
     } else if (providerId === 'mistral') {
       await cfg.update('providers.mistral.showBillingInDetail', !showBilling, vscode.ConfigurationTarget.Global);
     }
+  } else if (picked.label === ACTION_REFRESH_TOKEN) {
+    await vscode.commands.executeCommand('usagebar.refreshAntigravityToken');
+  } else if (picked.label === ACTION_SET_TOKEN) {
+    await vscode.commands.executeCommand('usagebar.setAntigravityToken');
+  } else if (picked.label === ACTION_SET_COOKIE) {
+    await vscode.commands.executeCommand('usagebar.setMistralCookie');
+  } else if (picked.label === ACTION_SET_API_KEY) {
+    await vscode.commands.executeCommand('usagebar.setDeepseekApiKey');
   }
 }
 

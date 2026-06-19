@@ -77,7 +77,7 @@
         },
         "usagebar.providers.antigravity.enabled": {
           "type": "boolean", "default": true,
-          "description": "Show Antigravity quota in the status bar."
+          "markdownDescription": "Show Antigravity (Google Cloud Code) quota in the status bar.\n\n**Data sources (tried in order):**\n- `auto`: detects running Antigravity IDE extension language server, then falls back to OAuth\n- `cli`: same as auto\n- `oauth`: OAuth only (skip local probe)\n\n**OAuth setup (recommended):** install [antigravity-usage](https://www.npmjs.com/package/antigravity-usage) and run `antigravity-usage login`. UsageBar reads its stored credentials and auto-refreshes tokens — no manual token management needed.\n\n**Manual token override:** use the _Set OAuth token_ action in the Antigravity detail panel or **[UsageBar: Set Antigravity Token](command:usagebar.setAntigravityToken)**. Overrides antigravity-usage credentials but does not auto-refresh."
         },
         "usagebar.providers.antigravity.source": {
           "type": "string", "enum": ["auto", "cli", "oauth"], "default": "auto",
@@ -121,8 +121,9 @@
       {"command": "usagebar.setClaudeCookie",      "title": "UsageBar: Set Claude Session Cookie"},
       {"command": "usagebar.setMistralCookie",     "title": "UsageBar: Set Mistral Admin Cookie"},
       {"command": "usagebar.setDeepseekApiKey",    "title": "UsageBar: Set DeepSeek API Key"},
-      {"command": "usagebar.setAntigravityToken",  "title": "UsageBar: Set Antigravity OAuth Token"},
-      {"command": "usagebar.clearSecrets",         "title": "UsageBar: Clear All Secrets"}
+      {"command": "usagebar.setAntigravityToken",     "title": "UsageBar: Set Antigravity OAuth Token"},
+      {"command": "usagebar.refreshAntigravityToken", "title": "UsageBar: Refresh Antigravity Token via gcloud"},
+      {"command": "usagebar.clearSecrets",            "title": "UsageBar: Clear All Secrets"}
     ],
     "menus": {
       "commandPalette": [
@@ -134,6 +135,7 @@
         {"command": "usagebar.setMistralCookie"},
         {"command": "usagebar.setDeepseekApiKey"},
         {"command": "usagebar.setAntigravityToken"},
+        {"command": "usagebar.refreshAntigravityToken"},
         {"command": "usagebar.clearSecrets"}
       ]
     }

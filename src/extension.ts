@@ -21,7 +21,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   registry.register(new CodexProvider(secretStore));
   registry.register(new MistralProvider(secretStore));
   registry.register(new DeepSeekProvider(secretStore));
-  registry.register(new AntigravityProvider(secretStore));
+  const antigravityProvider = new AntigravityProvider(secretStore);
+  registry.register(antigravityProvider);
   store.registerProviders(registry.getAll());
 
   context.subscriptions.push(
@@ -69,6 +70,15 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     vscode.commands.registerCommand('usagebar.setAntigravityToken', () =>
       promptSecret('antigravity.googleOAuthToken', 'Paste Antigravity Google OAuth token', 'ya29....'),
     ),
+    vscode.commands.registerCommand('usagebar.refreshAntigravityToken', async () => {
+      const ok = await antigravityProvider.fetchFreshToken();
+      if (ok) {
+        await store.refresh();
+        vscode.window.showInformationMessage('UsageBar: Antigravity token refreshed.');
+      } else {
+        vscode.window.showWarningMessage('UsageBar: No stored credentials. Run `antigravity-usage login` first.');
+      }
+    }),
     vscode.commands.registerCommand('usagebar.clearSecrets', async () => {
       const pick = await vscode.window.showQuickPick(
         ['claude.sessionCookie', 'mistral.adminCookie', 'deepseek.apiKey', 'antigravity.googleOAuthToken', 'ALL'],

@@ -16,7 +16,7 @@ UsageBar is a VS Code extension that displays real-time usage metrics — quota 
 | **OpenAI Codex CLI** | 5-hour session %, weekly % | OAuth (`~/.codex/auth.json`) or CLI |
 | **Mistral** | Vibe plan quota % or monthly billing spend | Browser session cookie (auto-imported or manual) |
 | **DeepSeek** | API credit balance | API key (`DEEPSEEK_API_KEY` env or VS Code secret) |
-| **Antigravity** (Google Cloud Code) | Gemini + Claude/GPT quota %, reset times | Local language server, `agy` CLI, or Google OAuth |
+| **Antigravity** (Google Cloud Code) | Gemini + Claude/GPT quota %, reset times | Local language server, or OAuth via `antigravity-usage` |
 
 ---
 
@@ -75,7 +75,22 @@ Set `DEEPSEEK_API_KEY` in your environment, or run **UsageBar: Set DeepSeek API 
 
 ### Antigravity
 
-If the Antigravity app or `agy` CLI is installed and running, UsageBar detects it automatically. No additional config required.
+**Recommended setup:** install [antigravity-usage](https://www.npmjs.com/package/antigravity-usage) and run `antigravity-usage login` once. UsageBar reads its stored credentials and auto-refreshes tokens on every cycle — no manual token management needed.
+
+```bash
+npm install -g antigravity-usage
+antigravity-usage login
+```
+
+If the Antigravity IDE extension language server is running (detected via `ps`), UsageBar probes it directly without needing any OAuth setup.
+
+**Model display:** Antigravity exposes many Gemini and Claude/GPT models. UsageBar merges them intelligently:
+
+- Models that share the same quota pool are collapsed into a single **Gemini** or **Claude|GPT** entry.
+- If a model has a different remaining fraction than the rest of its group, it is shown individually (e.g. **Gemini 3.5 Flash**) with the rest shown as **Gemini (others)**.
+- Claude and GPT models share a single pool and are always merged as **Claude|GPT**.
+
+Use `usagebar.providers.antigravity.group` to choose which group appears as the primary status bar metric (`"gemini"` or `"claude"`).
 
 ---
 
