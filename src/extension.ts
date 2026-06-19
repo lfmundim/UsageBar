@@ -1,28 +1,68 @@
 import * as vscode from 'vscode';
+import { ProviderRegistry } from './providers/registry';
+import { UsageStore } from './store/usageStore';
+import { SecretStore } from './util/secrets';
 
-export function activate(context: vscode.ExtensionContext): void {
-  // Register commands
+export async function activate(context: vscode.ExtensionContext): Promise<void> {
+  const registry = new ProviderRegistry();
+
+  // Providers will be registered here in later tasks:
+  // registry.register(new ClaudeProvider(context));
+  // registry.register(new CodexProvider(context));
+  // registry.register(new MistralProvider(context));
+  // registry.register(new DeepSeekProvider(context));
+  // registry.register(new AntigravityProvider(context));
+
+  const store = new UsageStore(context);
+  store.registerProviders(registry.getAll());
+  context.subscriptions.push(store);
+
+  const secretStore = new SecretStore(context.secrets);
+
+  // Re-start timer when refresh interval config changes
   context.subscriptions.push(
-    vscode.commands.registerCommand('usagebar.refresh', () => {
-      vscode.window.showInformationMessage('UsageBar: Refresh triggered (not yet implemented)');
-    }),
-    vscode.commands.registerCommand('usagebar.openSettings', () => {
-      vscode.commands.executeCommand('workbench.view.extension.usagebar-sidebar');
+    vscode.workspace.onDidChangeConfiguration((e) => {
+      if (e.affectsConfiguration('usagebar.refreshInterval')) {
+        store.startTimer();
+      }
     }),
   );
 
-  // Status bar placeholder — will be replaced by StatusBarController in TASK-08
+  // Commands
+  context.subscriptions.push(
+    vscode.commands.registerCommand('usagebar.refresh', () => store.refresh()),
+    vscode.commands.registerCommand('usagebar.openSettings', () =>
+      vscode.commands.executeCommand('workbench.view.extension.usagebar-sidebar'),
+    ),
+  );
+
+  // Placeholder status bar item (replaced in TASK-08)
   const statusBarItem = vscode.window.createStatusBarItem(
     vscode.StatusBarAlignment.Right,
     100,
   );
   statusBarItem.text = '$(pulse) UsageBar';
-  statusBarItem.tooltip = 'AI usage tracking (loading…)';
+  statusBarItem.tooltip = 'Loading…';
   statusBarItem.command = 'usagebar.openSettings';
   statusBarItem.show();
   context.subscriptions.push(statusBarItem);
+
+  store.onDidUpdate.event(() => {
+    const snapshots = store.getAllSnapshots();
+    if (snapshots.length === 0) {
+      statusBarItem.text = '$(pulse) UsageBar';
+      return;
+    }
+    // Simple combined label — replaced by StatusBarController in TASK-08
+    const parts = snapshots
+      .filter((s) => s.primary?.usedPercent !== undefined)
+      .map((s) => `${s.providerId.slice(0, 3).toUpperCase()} ${s.primary!.usedPercent!.toFixed(0)}%`);
+    statusBarItem.text = parts.length > 0 ? parts.join(' │ ') : '$(pulse) UsageBar';
+  });
+
+  store.startTimer();
 }
 
 export function deactivate(): void {
-  // cleanup handled via context.subscriptions
+  // cleanup via context.subscriptions
 }
