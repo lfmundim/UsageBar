@@ -4,7 +4,7 @@
   "description": "AI coding assistant usage in your VS Code status bar — Claude, Codex, Mistral, DeepSeek, Antigravity",
   "version": "0.1.0",
   "publisher": "kimdim",
-  "icon": "assets/icon.png",
+  "icon": "logo.png",
   "repository": {
     "type": "git",
     "url": "https://github.com/lfmundim/UsageBar"
