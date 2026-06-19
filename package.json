@@ -35,6 +35,7 @@
         "usagebar.providers.codex.source": {"type": "string", "enum": ["auto", "oauth", "cli"], "default": "auto", "description": "Auth/data source for Codex."},
         "usagebar.providers.mistral.enabled": {"type": "boolean", "default": true, "description": "Show Mistral usage in the status bar."},
         "usagebar.providers.mistral.cookieSource": {"type": "string", "enum": ["auto", "manual"], "default": "auto", "description": "Cookie source for Mistral."},
+        "usagebar.providers.mistral.metric": {"type": "string", "enum": ["billing", "vibe"], "default": "billing", "description": "What to show in the Mistral status bar item: monthly billing spend or Vibe plan usage %."},
         "usagebar.providers.deepseek.enabled": {"type": "boolean", "default": true, "description": "Show DeepSeek balance in the status bar."},
         "usagebar.providers.antigravity.enabled": {"type": "boolean", "default": true, "description": "Show Antigravity quota in the status bar."},
         "usagebar.providers.antigravity.source": {"type": "string", "enum": ["auto", "cli", "oauth"], "default": "auto", "description": "Auth/data source for Antigravity."},
