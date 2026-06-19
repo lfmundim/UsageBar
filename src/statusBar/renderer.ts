@@ -67,17 +67,21 @@ export function getBackgroundColor(snapshot: UsageSnapshot): vscode.ThemeColor |
 // --- helpers ---
 
 function renderWindow(rw: RateWindow, style: string): string {
+  const cfg = vscode.workspace.getConfiguration('usagebar');
+  const percentMode = cfg.get<string>('display.percentMode', 'used');
+  const usedPct = rw.usedPercent ?? 0;
+  const displayPct = percentMode === 'remaining' ? 100 - usedPct : usedPct;
+
   if (style === 'percent') {
-    return rw.usedPercent !== undefined ? `${rw.usedPercent.toFixed(0)}%` : '?%';
+    return rw.usedPercent !== undefined ? `${displayPct.toFixed(0)}%` : '?%';
   }
-  const pct = rw.usedPercent ?? 0;
-  const filled = Math.round(Math.min(100, Math.max(0, pct)) / 10);
+  const filled = Math.round(Math.min(100, Math.max(0, usedPct)) / 10);
   const empty = 10 - filled;
   if (style === 'dots') {
-    return `${'●'.repeat(filled)}${'○'.repeat(empty)} ${pct.toFixed(0)}%`;
+    return `${'●'.repeat(filled)}${'○'.repeat(empty)} ${displayPct.toFixed(0)}%`;
   }
   // blocks (default)
-  return `${'█'.repeat(filled)}${'░'.repeat(empty)} ${pct.toFixed(0)}%`;
+  return `${'█'.repeat(filled)}${'░'.repeat(empty)} ${displayPct.toFixed(0)}%`;
 }
 
 function formatResetIn(isoDate: string | undefined): string {

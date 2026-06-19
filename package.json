@@ -29,6 +29,7 @@
         },
         "usagebar.display.showProviderLabel": {"type": "boolean", "default": true, "description": "Show provider name prefix in status bar items."},
         "usagebar.display.progressBarStyle": {"type": "string", "enum": ["blocks", "dots", "percent"], "default": "blocks", "description": "Visual style for usage progress in the status bar."},
+        "usagebar.display.percentMode": {"type": "string", "enum": ["used", "remaining"], "default": "used", "enumDescriptions": ["Show percentage of quota used.", "Show percentage of quota remaining."], "description": "Whether to display percent used or percent remaining."},
         "usagebar.providers.claude.enabled": {
           "type": "boolean", "default": true,
           "description": "Show Claude Code usage in the status bar."
