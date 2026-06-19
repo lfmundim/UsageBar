@@ -1,0 +1,86 @@
+{
+  "name": "usagebar",
+  "displayName": "UsageBar",
+  "description": "AI coding assistant usage in your VS Code status bar — Claude, Codex, Mistral, DeepSeek, Antigravity",
+  "version": "0.1.0",
+  "publisher": "lfmundim",
+  "icon": "assets/icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lfmundim/UsageBar"
+  },
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Other", "Visualization"],
+  "keywords": ["claude", "codex", "mistral", "deepseek", "antigravity", "ai", "usage", "status bar", "token", "cost"],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./out/extension.js",
+  "contributes": {
+    "configuration": {
+      "title": "UsageBar",
+      "properties": {
+        "usagebar.refreshInterval": {
+          "type": "string",
+          "enum": ["manual", "1m", "2m", "5m", "15m", "30m"],
+          "default": "5m",
+          "description": "How often to refresh usage data from all providers."
+        },
+        "usagebar.display.showProviderLabel": {"type": "boolean", "default": true, "description": "Show provider name prefix in status bar items."},
+        "usagebar.display.progressBarStyle": {"type": "string", "enum": ["blocks", "dots", "percent"], "default": "blocks", "description": "Visual style for usage progress in the status bar."},
+        "usagebar.providers.claude.enabled": {"type": "boolean", "default": true, "description": "Show Claude Code usage in the status bar."},
+        "usagebar.providers.claude.source": {"type": "string", "enum": ["auto", "oauth", "web", "cli"], "default": "auto", "description": "Auth/data source for Claude Code."},
+        "usagebar.providers.codex.enabled": {"type": "boolean", "default": true, "description": "Show OpenAI Codex CLI usage in the status bar."},
+        "usagebar.providers.codex.source": {"type": "string", "enum": ["auto", "oauth", "cli"], "default": "auto", "description": "Auth/data source for Codex."},
+        "usagebar.providers.mistral.enabled": {"type": "boolean", "default": true, "description": "Show Mistral usage in the status bar."},
+        "usagebar.providers.mistral.cookieSource": {"type": "string", "enum": ["auto", "manual"], "default": "auto", "description": "Cookie source for Mistral."},
+        "usagebar.providers.deepseek.enabled": {"type": "boolean", "default": true, "description": "Show DeepSeek balance in the status bar."},
+        "usagebar.providers.antigravity.enabled": {"type": "boolean", "default": true, "description": "Show Antigravity quota in the status bar."},
+        "usagebar.providers.antigravity.source": {"type": "string", "enum": ["auto", "cli", "oauth"], "default": "auto", "description": "Auth/data source for Antigravity."},
+        "usagebar.costTracking.enabled": {"type": "boolean", "default": false, "description": "Scan local JSONL session logs to compute daily token costs."},
+        "usagebar.costTracking.historyDays": {"type": "number", "default": 30, "minimum": 1, "maximum": 365, "description": "Number of days of JSONL history to scan."}
+      }
+    },
+    "viewsContainers": {
+      "activitybar": [{"id": "usagebar-sidebar", "title": "UsageBar", "icon": "assets/sidebar-icon.svg"}]
+    },
+    "views": {
+      "usagebar-sidebar": [{"type": "webview", "id": "usagebar.settingsView", "name": "Settings", "visibility": "visible"}]
+    },
+    "commands": [
+      {"command": "usagebar.refresh", "title": "UsageBar: Refresh All Providers"},
+      {"command": "usagebar.openSettings", "title": "UsageBar: Open Settings Panel"}
+    ],
+    "menus": {
+      "commandPalette": [
+        {"command": "usagebar.refresh"},
+        {"command": "usagebar.openSettings"}
+      ]
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src/",
+    "test": "vscode-test",
+    "package": "vsce package --no-dependencies",
+    "publish": "vsce publish --no-dependencies"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "@types/glob": "^8.1.0",
+    "@types/node": "^26.0.0",
+    "@types/vscode": "^1.125.0",
+    "@typescript-eslint/eslint-plugin": "^8.61.1",
+    "@typescript-eslint/parser": "^8.61.1",
+    "@vscode/test-cli": "^0.0.12",
+    "@vscode/test-electron": "^3.0.0",
+    "@vscode/vsce": "^3.9.2",
+    "esbuild": "^0.28.1",
+    "eslint": "^10.5.0",
+    "glob": "^13.0.6",
+    "ovsx": "^1.0.1",
+    "typescript": "^6.0.3"
+  }
+}
