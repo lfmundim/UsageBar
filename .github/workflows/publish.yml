@@ -81,17 +81,22 @@ jobs:
     if: needs.check-secrets.outputs.has_vsce_token == 'true'
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version: '20'
 
       - name: Install dependencies
         run: npm ci
 
       - name: Compile
         run: npm run compile
+
+      - name: Compute version
+        run: bash scripts/compute-version.sh
 
       - name: Publish to VS Code Marketplace
         run: npx vsce publish --no-dependencies
@@ -104,17 +109,22 @@ jobs:
     if: needs.check-secrets.outputs.has_ovsx_token == 'true'
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version: '20'
 
       - name: Install dependencies
         run: npm ci
 
       - name: Compile
         run: npm run compile
+
+      - name: Compute version
+        run: bash scripts/compute-version.sh
 
       - name: Publish to Open VSX
         run: npx ovsx publish --no-dependencies

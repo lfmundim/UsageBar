@@ -13,17 +13,22 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version: '20'
 
       - name: Install dependencies
         run: npm ci
 
       - name: Compile
         run: npm run compile
+
+      - name: Compute version
+        run: bash scripts/compute-version.sh
 
       - name: Package VSIX
         run: npx vsce package --no-dependencies

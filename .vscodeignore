@@ -1,0 +1,13 @@
+.github/
+src/
+scripts/
+**/*.ts
+!out/**
+node_modules/
+.eslintrc.json
+tsconfig.json
+**/*.map
+.vscode-test/
+*.vsix
+UsageBar-tasks/
+version.json
