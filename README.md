@@ -2,7 +2,7 @@
 
 **AI coding assistant usage in your VS Code status bar.**
 
-UsageBar is a VS Code extension that displays real-time usage metrics—token counts, rate limit windows, costs, and account balances—for your AI coding tools, directly in the editor's status bar. A sidebar settings panel lets you configure each provider without leaving VS Code.
+UsageBar is a VS Code extension that displays real-time usage metrics — quota windows, rate limits, and account balances — for your AI coding tools, directly in the editor's status bar.
 
 > Inspired by and based on [CodexBar](https://github.com/steipete/CodexBar) by [@steipete](https://github.com/steipete) — a macOS menu bar app with the same provider coverage. UsageBar brings the same philosophy cross-platform into VS Code.
 
@@ -12,22 +12,22 @@ UsageBar is a VS Code extension that displays real-time usage metrics—token co
 
 | Provider | What is tracked | Auth method |
 |---|---|---|
-| **Claude Code** (Anthropic) | Session %, weekly %, model-specific windows, monthly cost | OAuth credentials, session cookie, or CLI (`claude /usage`) |
-| **OpenAI Codex CLI** | 5-hour session %, weekly %, credits balance | OAuth (`~/.codex/auth.json`), CLI RPC, or browser cookie |
-| **Mistral** | Monthly spend (pay-as-you-go) or Vibe plan % | Browser session cookie (auto-imported or manual) |
-| **DeepSeek** | API credit balance (USD or CNY) | API key (`DEEPSEEK_API_KEY` env or VS Code secret) |
+| **Claude Code** (Anthropic) | Session %, weekly %, model-specific windows | OAuth credentials or CLI (`claude /usage`) |
+| **OpenAI Codex CLI** | 5-hour session %, weekly % | OAuth (`~/.codex/auth.json`) or CLI |
+| **Mistral** | Vibe plan quota % or monthly billing spend | Browser session cookie (auto-imported or manual) |
+| **DeepSeek** | API credit balance | API key (`DEEPSEEK_API_KEY` env or VS Code secret) |
 | **Antigravity** (Google Cloud Code) | Gemini + Claude/GPT quota %, reset times | Local language server, `agy` CLI, or Google OAuth |
 
 ---
 
 ## Features
 
-- **Status bar items** — one per enabled provider; shows usage % or balance with a compact text progress bar
+- **Status bar items** — one per enabled provider; shows usage % or balance with a progress bar and custom provider icon
+- **Detail popup** — click any status bar item to open a QuickPick with progress bars, reset times, and balance breakdowns; pressing Enter on any data row opens the provider's web portal
 - **Configurable refresh** — manual, or automatic at 1 / 2 / 5 / 15 / 30 minute intervals
-- **Sidebar settings panel** — enable/disable providers, input API keys, choose auth source, configure display options
-- **Secure secret storage** — API keys stored in VS Code's built-in secret store (OS keychain-backed), never in plaintext settings
-- **Auto cookie import** — reads browser session cookies from Safari, Chrome, and Firefox for providers that use web auth (macOS)
-- **Cost scanning** — optionally scans local JSONL session logs from Claude and Codex CLIs to compute daily token costs
+- **Native VS Code settings** — configure providers, display options, and auth sources via the standard Settings UI (`usagebar.*`)
+- **Secure secret storage** — API keys and cookies stored in VS Code's built-in secret store (OS keychain-backed), never in plaintext settings
+- **Auto cookie import** — reads Firefox session cookies on macOS for providers that use web auth
 - **Cross-platform** — macOS, Linux, Windows
 
 ---
@@ -39,7 +39,7 @@ Install from the VS Code Marketplace:
 1. Open VS Code
 2. Press `Ctrl+P` / `Cmd+P` → type `ext install lfmundim.usagebar`
 3. Reload VS Code
-4. Open the **UsageBar** panel in the sidebar (activity bar icon) to configure providers
+4. Status bar items appear automatically; open VS Code Settings and search `usagebar` to configure
 
 Or install the `.vsix` directly:
 
@@ -53,50 +53,64 @@ code --install-extension usagebar-x.y.z.vsix
 
 ### Claude Code
 
-UsageBar automatically reads Claude CLI credentials from `~/.claude/.credentials.json` (created when you log in with `claude login`). No manual setup required for most users.
-
-To use the web API instead, paste a `Cookie:` header from a logged-in `claude.ai` request in the sidebar settings.
+UsageBar automatically reads Claude CLI credentials from `~/.claude/.credentials.json` (created by `claude login`). No manual setup required for most users.
 
 ### OpenAI Codex CLI
 
-UsageBar reads OAuth credentials from `~/.codex/auth.json` (created by `codex login`). No manual setup needed.
+Reads OAuth credentials from `~/.codex/auth.json` (created by `codex login`). No manual setup needed.
 
 ### Mistral
 
-UsageBar can import your `admin.mistral.ai` session cookie automatically from your default browser (macOS only). On Linux/Windows, paste the cookie manually in the sidebar settings.
+UsageBar can import your session cookie automatically from Firefox on macOS. On other browsers or platforms, paste the full `Cookie:` header manually:
+
+1. Open [console.mistral.ai/codestral/cli](https://console.mistral.ai/codestral/cli)
+2. Open DevTools → Network tab → click any request → copy the `Cookie:` header value
+3. Run **UsageBar: Set Mistral Admin Cookie** from the Command Palette
+
+Toggle between Vibe plan % and billing spend via the detail popup (click the Mistral status bar item).
 
 ### DeepSeek
 
-Set `DEEPSEEK_API_KEY` in your environment, or enter the key in the sidebar settings. Get a key at https://platform.deepseek.com/api_keys.
+Set `DEEPSEEK_API_KEY` in your environment, or run **UsageBar: Set DeepSeek API Key** from the Command Palette. Get a key at [platform.deepseek.com/usage](https://platform.deepseek.com/usage).
 
 ### Antigravity
 
-If the Antigravity app or `agy` CLI is installed and running, UsageBar detects it automatically via the local language server. No additional config required.
+If the Antigravity app or `agy` CLI is installed and running, UsageBar detects it automatically. No additional config required.
 
 ---
 
 ## Configuration
 
-All settings live under the `usagebar.*` VS Code configuration namespace.
+All settings live under `usagebar.*` in VS Code Settings. Provider sub-settings are hidden when the provider is disabled.
 
 | Setting | Default | Description |
 |---|---|---|
 | `usagebar.refreshInterval` | `"5m"` | Refresh frequency: `"manual"`, `"1m"`, `"2m"`, `"5m"`, `"15m"`, `"30m"` |
+| `usagebar.display.showProviderLabel` | `true` | Show provider name alongside icon in status bar |
+| `usagebar.display.progressBarStyle` | `"blocks"` | Progress bar style: `"blocks"`, `"dots"`, `"percent"` |
 | `usagebar.providers.claude.enabled` | `true` | Enable Claude status bar item |
 | `usagebar.providers.claude.source` | `"auto"` | Auth source: `"auto"`, `"oauth"`, `"web"`, `"cli"` |
+| `usagebar.providers.claude.showExtras` | `true` | Show extra quota windows (Opus, Sonnet, Routines) in detail popup |
 | `usagebar.providers.codex.enabled` | `true` | Enable Codex status bar item |
 | `usagebar.providers.codex.source` | `"auto"` | Auth source: `"auto"`, `"oauth"`, `"cli"` |
 | `usagebar.providers.mistral.enabled` | `true` | Enable Mistral status bar item |
 | `usagebar.providers.mistral.cookieSource` | `"auto"` | Cookie source: `"auto"`, `"manual"` |
+| `usagebar.providers.mistral.metric` | `"billing"` | What to show: `"billing"` (monthly spend) or `"vibe"` (quota %) |
+| `usagebar.providers.mistral.showBillingInDetail` | `true` | Show billing row in detail popup |
 | `usagebar.providers.deepseek.enabled` | `true` | Enable DeepSeek status bar item |
 | `usagebar.providers.antigravity.enabled` | `true` | Enable Antigravity status bar item |
 | `usagebar.providers.antigravity.source` | `"auto"` | Source: `"auto"`, `"cli"`, `"oauth"` |
-| `usagebar.display.showProviderLabel` | `true` | Show provider name prefix in status bar |
-| `usagebar.display.progressBarStyle` | `"blocks"` | Progress bar style: `"blocks"`, `"dots"`, `"percent"` |
-| `usagebar.costTracking.enabled` | `false` | Enable local JSONL cost scanning for Claude and Codex |
-| `usagebar.costTracking.historyDays` | `30` | Days of JSONL history to scan |
+| `usagebar.providers.antigravity.group` | `"gemini"` | Model group: `"gemini"` or `"claude"` (Claude + GPT) |
 
-API keys and cookies are stored securely via VS Code's secret storage API (not in `settings.json`).
+### Secret management (Command Palette)
+
+| Command | Action |
+|---|---|
+| `UsageBar: Set Claude Session Cookie` | Store Claude web session cookie |
+| `UsageBar: Set Mistral Admin Cookie` | Store Mistral session cookie |
+| `UsageBar: Set DeepSeek API Key` | Store DeepSeek API key |
+| `UsageBar: Set Antigravity OAuth Token` | Store Antigravity Google OAuth token |
+| `UsageBar: Clear All Secrets` | Remove stored secrets |
 
 ---
 
@@ -104,7 +118,7 @@ API keys and cookies are stored securely via VS Code's secret storage API (not i
 
 ```
 src/
-  extension.ts              # activate() / deactivate()
+  extension.ts              # activate() / deactivate(), command registration
   providers/
     base.ts                 # ProviderInterface, UsageSnapshot types
     claude.ts               # Claude Code provider
@@ -112,19 +126,16 @@ src/
     mistral.ts              # Mistral provider
     deepseek.ts             # DeepSeek provider
     antigravity.ts          # Antigravity provider
+    registry.ts             # Provider registry
   statusBar/
     controller.ts           # Manages StatusBarItem instances
     renderer.ts             # Text + progress bar rendering
-  sidebar/
-    settingsProvider.ts     # WebviewViewProvider for sidebar panel
-    webview/                # HTML/CSS/JS for the settings UI
+    detail.ts               # QuickPick detail popup
   store/
     usageStore.ts           # State holder; orchestrates refresh timer
-  auth/
-    cookieImporter.ts       # Browser cookie extraction (macOS)
-    oauthManager.ts         # Claude + Codex OAuth token management
-  config/
-    settings.ts             # VS Code configuration wrapper
+  util/
+    secrets.ts              # VS Code SecretStorage wrapper
+    http.ts                 # HTTPS request helper
 ```
 
 Each provider implements `ProviderInterface`:
@@ -155,7 +166,7 @@ npm run compile
 
 ## Credits
 
-- [CodexBar](https://github.com/steipete/CodexBar) by [@steipete](https://github.com/steipete) — the macOS menu bar app that inspired this project. The provider integration logic, API endpoints, auth strategies, and data parsing approaches in UsageBar are directly derived from studying CodexBar's open-source implementation.
+- [CodexBar](https://github.com/steipete/CodexBar) by [@steipete](https://github.com/steipete) — the macOS menu bar app that inspired this project. Provider integration logic, API endpoints, auth strategies, and data parsing approaches in UsageBar are directly derived from studying CodexBar's open-source implementation.
 
 ---
 
