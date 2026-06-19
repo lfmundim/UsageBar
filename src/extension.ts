@@ -6,13 +6,13 @@ import { ClaudeProvider } from './providers/claude';
 import { CodexProvider } from './providers/codex';
 import { MistralProvider } from './providers/mistral';
 import { DeepSeekProvider } from './providers/deepseek';
+import { AntigravityProvider } from './providers/antigravity';
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
   const registry = new ProviderRegistry();
 
   // Providers will be registered here in later tasks:
   // registry.register(new DeepSeekProvider(context));
-  // registry.register(new AntigravityProvider(context));
 
   const store = new UsageStore(context);
   context.subscriptions.push(store);
@@ -22,6 +22,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   registry.register(new CodexProvider(secretStore));
   registry.register(new MistralProvider(secretStore));
   registry.register(new DeepSeekProvider(secretStore));
+  registry.register(new AntigravityProvider(secretStore));
   store.registerProviders(registry.getAll());
 
   // Re-start timer when refresh interval config changes

@@ -39,6 +39,7 @@
         "usagebar.providers.deepseek.enabled": {"type": "boolean", "default": true, "description": "Show DeepSeek balance in the status bar."},
         "usagebar.providers.antigravity.enabled": {"type": "boolean", "default": true, "description": "Show Antigravity quota in the status bar."},
         "usagebar.providers.antigravity.source": {"type": "string", "enum": ["auto", "cli", "oauth"], "default": "auto", "description": "Auth/data source for Antigravity."},
+        "usagebar.providers.antigravity.group": {"type": "string", "enum": ["gemini", "claude"], "default": "gemini", "description": "Model group to display for Antigravity: 'gemini' or 'claude' (Claude + GPT)."},
         "usagebar.costTracking.enabled": {"type": "boolean", "default": false, "description": "Scan local JSONL session logs to compute daily token costs."},
         "usagebar.costTracking.historyDays": {"type": "number", "default": 30, "minimum": 1, "maximum": 365, "description": "Number of days of JSONL history to scan."}
       }
