@@ -1,8 +1,17 @@
 # UsageBar
+[![Visual Studio Marketplace Version](https://vsmarketplacebadges.dev/version/kimdim.usagebar.svg)](https://marketplace.visualstudio.com/items?itemName=kimdim.usagebar)
+[![Visual Studio Marketplace Installs](https://vsmarketplacebadges.dev/installs/kimdim.usagebar.svg)](https://marketplace.visualstudio.com/items?itemName=kimdim.usagebar)
+[![Visual Studio Marketplace Rating](https://vsmarketplacebadges.dev/rating-star/kimdim.usagebar.svg)](https://marketplace.visualstudio.com/items?itemName=kimdim.usagebar)
+
+<p align="center">
+  <img src="logo.png" alt="Logo" width="30%" />
+</p>
 
 **AI coding assistant usage in your VS Code status bar.**
 
 UsageBar is a VS Code extension that displays real-time usage metrics — quota windows, rate limits, and account balances — for your AI coding tools, directly in the editor's status bar.
+
+![VSCode with Extension Installed](assets/readme-imgs/vscode.png)
 
 > Inspired by and based on [CodexBar](https://github.com/steipete/CodexBar) by [@steipete](https://github.com/steipete) — a macOS menu bar app with the same provider coverage. UsageBar brings the same philosophy cross-platform into VS Code.
 
@@ -22,12 +31,12 @@ UsageBar is a VS Code extension that displays real-time usage metrics — quota 
 
 ## Features
 
+![Detail popup](assets/readme-imgs/quickview.png)
 - **Status bar items** — one per enabled provider; shows usage % or balance with a progress bar and custom provider icon
 - **Detail popup** — click any status bar item to open a QuickPick with progress bars, reset times, and balance breakdowns; pressing Enter on any data row opens the provider's web portal
 - **Configurable refresh** — manual, or automatic at 1 / 2 / 5 / 15 / 30 minute intervals
 - **Native VS Code settings** — configure providers, display options, and auth sources via the standard Settings UI (`usagebar.*`)
 - **Secure secret storage** — API keys and cookies stored in VS Code's built-in secret store (OS keychain-backed), never in plaintext settings
-- **Auto cookie import** — reads Firefox session cookies on macOS for providers that use web auth
 - **Cross-platform** — macOS, Linux, Windows
 
 ---
@@ -44,7 +53,7 @@ Install from the VS Code Marketplace:
 Or install the `.vsix` directly:
 
 ```bash
-code --install-extension usagebar-x.y.z.vsix
+code --install-extension <downloaded-release>.vsix
 ```
 
 ---
