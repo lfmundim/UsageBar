@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { ProviderRegistry } from './providers/registry';
 import { UsageStore } from './store/usageStore';
 import { SecretStore } from './util/secrets';
+import { StatusBarController } from './statusBar/controller';
 import { ClaudeProvider } from './providers/claude';
 import { CodexProvider } from './providers/codex';
 import { MistralProvider } from './providers/mistral';
@@ -42,29 +43,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     ),
   );
 
-  // Placeholder status bar item (replaced in TASK-08)
-  const statusBarItem = vscode.window.createStatusBarItem(
-    vscode.StatusBarAlignment.Right,
-    100,
-  );
-  statusBarItem.text = '$(pulse) UsageBar';
-  statusBarItem.tooltip = 'Loading…';
-  statusBarItem.command = 'usagebar.openSettings';
-  statusBarItem.show();
-  context.subscriptions.push(statusBarItem);
-
-  store.onDidUpdate.event(() => {
-    const snapshots = store.getAllSnapshots();
-    if (snapshots.length === 0) {
-      statusBarItem.text = '$(pulse) UsageBar';
-      return;
-    }
-    // Simple combined label — replaced by StatusBarController in TASK-08
-    const parts = snapshots
-      .filter((s) => s.primary?.usedPercent !== undefined)
-      .map((s) => `${s.providerId.slice(0, 3).toUpperCase()} ${s.primary!.usedPercent!.toFixed(0)}%`);
-    statusBarItem.text = parts.length > 0 ? parts.join(' │ ') : '$(pulse) UsageBar';
-  });
+  const controller = new StatusBarController(store, registry);
+  context.subscriptions.push(controller);
 
   store.startTimer();
 }
