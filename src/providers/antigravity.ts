@@ -481,14 +481,6 @@ function mergeAsOne(models: ModelEntry[], label: string): RateWindow | null {
   return { label, usedPercent: (1 - worst.remaining) * 100, resetAt: worst.resetAt };
 }
 
-function toRateWindow(m: { label: string; remaining: number; resetAt?: string }): RateWindow {
-  return {
-    label: m.label,
-    usedPercent: Math.min(100, (1 - m.remaining) * 100),
-    resetAt: m.resetAt,
-  };
-}
-
 function selectGroup(groups: QuotaGroup[], prefer: string): QuotaGroup | undefined {
   const isGemini = (name: string) => /gemini/i.test(name);
   const isClaude = (name: string) => /claude|gpt/i.test(name);

@@ -249,6 +249,7 @@ function pct(used: number, limit: number): number {
 }
 
 function parseCLIOutput(raw: string): { session?: RateWindow; weekly?: RateWindow } {
+  // eslint-disable-next-line no-control-regex
   const stripped = raw.replace(/\x1b\[[0-9;]*[mGKHF]/g, '').replace(/\r/g, '');
   const sessionPct  = /Current session[\s\S]{0,300}?(\d+)%/.exec(stripped);
   const sessionReset = /Current session[\s\S]{0,300}?[Rr]esets?\s+in\s+([^\n]+)/.exec(stripped);

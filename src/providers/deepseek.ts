@@ -1,4 +1,3 @@
-import * as vscode from 'vscode';
 import { ProviderInterface, UsageSnapshot, emptySnapshot } from './base';
 import { httpGetJson } from '../util/http';
 import { SecretStore } from '../util/secrets';
@@ -80,7 +79,7 @@ export class DeepSeekProvider implements ProviderInterface {
     const year = now.getFullYear();
     const headers = { Authorization: `Bearer ${apiKey}`, Accept: 'application/json' };
 
-    const [_amount, cost] = await Promise.allSettled([
+    const [, cost] = await Promise.allSettled([
       httpGetJson(`https://platform.deepseek.com/api/v0/usage/amount?month=${month}&year=${year}`, {
         headers, timeoutMs: 2_000,
       }),
