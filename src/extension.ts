@@ -2,22 +2,24 @@ import * as vscode from 'vscode';
 import { ProviderRegistry } from './providers/registry';
 import { UsageStore } from './store/usageStore';
 import { SecretStore } from './util/secrets';
+import { ClaudeProvider } from './providers/claude';
+import { CodexProvider } from './providers/codex';
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
   const registry = new ProviderRegistry();
 
   // Providers will be registered here in later tasks:
-  // registry.register(new ClaudeProvider(context));
-  // registry.register(new CodexProvider(context));
   // registry.register(new MistralProvider(context));
   // registry.register(new DeepSeekProvider(context));
   // registry.register(new AntigravityProvider(context));
 
   const store = new UsageStore(context);
-  store.registerProviders(registry.getAll());
   context.subscriptions.push(store);
 
   const secretStore = new SecretStore(context.secrets);
+  registry.register(new ClaudeProvider(secretStore));
+  registry.register(new CodexProvider(secretStore));
+  store.registerProviders(registry.getAll());
 
   // Re-start timer when refresh interval config changes
   context.subscriptions.push(
