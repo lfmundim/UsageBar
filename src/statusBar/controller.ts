@@ -11,6 +11,14 @@ const PROVIDER_PRIORITIES: Record<string, number> = {
   deepseek:    101,
 };
 
+const PROVIDER_ICONS: Record<string, string> = {
+  antigravity: 'usagebar-antigravity',
+  claude:      'usagebar-claude',
+  codex:       'usagebar-codex',
+  mistral:     'usagebar-mistral',
+  deepseek:    'usagebar-deepseek',
+};
+
 export class StatusBarController implements vscode.Disposable {
   private items = new Map<string, vscode.StatusBarItem>();
   private disposables: vscode.Disposable[] = [];
@@ -25,9 +33,10 @@ export class StatusBarController implements vscode.Disposable {
         vscode.StatusBarAlignment.Right,
         PROVIDER_PRIORITIES[provider.id] ?? 100,
       );
+      const icon = PROVIDER_ICONS[provider.id] ?? 'symbol-misc';
       item.command = 'usagebar.openSettings';
       item.name = `UsageBar — ${provider.displayName}`;
-      item.text = `$(sync~spin) ${provider.displayName}`;
+      item.text = `$(sync~spin) $(${icon}) ${provider.displayName}`;
       item.show();
       this.items.set(provider.id, item);
     }
@@ -65,21 +74,26 @@ export class StatusBarController implements vscode.Disposable {
       const snapshot = this.store.getSnapshot(providerId);
       const error    = this.store.getError(providerId);
 
+      const icon = PROVIDER_ICONS[providerId] ?? 'symbol-misc';
+      const cfg  = vscode.workspace.getConfiguration('usagebar');
+      const showLabel = cfg.get<boolean>('display.showProviderLabel', true);
+      const label = showLabel ? ` ${this.registry.getById(providerId)?.displayName ?? providerId}` : '';
+
       if (!snapshot && error) {
-        item.text = `$(error) ${providerId}`;
+        item.text = `$(error) $(${icon})${label}`;
         item.tooltip = `${providerId}: ${error.message}`;
         item.backgroundColor = new vscode.ThemeColor('statusBarItem.errorBackground');
         continue;
       }
 
       if (!snapshot) {
-        item.text = `$(sync~spin) ${providerId}`;
+        item.text = `$(sync~spin) $(${icon})${label}`;
         item.tooltip = 'Loading…';
         item.backgroundColor = undefined;
         continue;
       }
 
-      item.text = renderStatusBarText(snapshot);
+      item.text = `$(${icon}) ${renderStatusBarText(snapshot)}`;
       item.tooltip = renderTooltip(snapshot, error);
       item.backgroundColor = getBackgroundColor(snapshot);
     }

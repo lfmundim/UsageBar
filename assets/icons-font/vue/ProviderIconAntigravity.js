@@ -1,0 +1,25 @@
+import { defineComponent, h } from 'vue';
+
+export const ProviderIconAntigravity = defineComponent({
+  name: 'ProviderIconAntigravity',
+  props: {
+    class: {
+      type: String,
+      default: ''
+    }
+  },
+  setup(props, { attrs }) {
+    return () => h(
+      'svg',
+      {
+        viewBox: '0 0 20 20',
+        
+        class: `svgfont ${props.class}`,
+        ...attrs
+      },
+      [
+        h('path', {"d": "M85.2843 88.0301C90.1329 91.6664 97.4057 89.2422 90.7389 82.5755C70.7389 63.1816 74.9813 9.84827 50.1329 9.84827C25.2843 9.84827 29.5267 63.1816 9.52673 82.5755C2.25402 89.8483 10.1328 91.6664 14.9813 88.0301C33.7692 75.3028 32.5571 52.8786 50.1329 52.8786C67.7086 52.8786 66.4965 75.3028 85.2843 88.0301Z", "fillRule": "evenodd"})
+      ]
+    );
+  }
+});

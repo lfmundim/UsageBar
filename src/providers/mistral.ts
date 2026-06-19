@@ -26,8 +26,8 @@ interface MistralBillingResponse {
 }
 
 interface VibeUsageData {
-  usagePercentage: number;
-  resetAt?: string;
+  usage_percentage: number;
+  reset_at?: string;
 }
 
 export class MistralProvider implements ProviderInterface {
@@ -71,43 +71,43 @@ export class MistralProvider implements ProviderInterface {
     snap.balanceUsd = totalCost; // repurpose balanceUsd as "monthly spend"
 
     // Fetch Vibe plan (optional, non-fatal)
-    const vibeData = await this.fetchVibe(csrf).catch(() => null);
+    const vibeData = await this.fetchVibe(cookie, csrf).catch(() => null);
 
     const metric = vscode.workspace
       .getConfiguration('usagebar')
       .get<string>('providers.mistral.metric', 'billing');
 
-    if (metric === 'vibe' && vibeData) {
+    const vibePercent = typeof vibeData?.usage_percentage === 'number' ? vibeData.usage_percentage : undefined;
+
+    if (metric === 'vibe' && vibePercent !== undefined) {
       snap.primary = {
         label: 'Vibe plan',
-        usedPercent: vibeData.usagePercentage,
-        resetAt: vibeData.resetAt,
+        usedPercent: vibePercent,
+        resetAt: vibeData?.reset_at,
       };
     } else {
-      // Show billing cost as a "balance" — no rate window
       snap.primary = undefined;
-      // balanceUsd will be used by the status bar renderer to show "$12.34"
     }
 
-    if (vibeData) {
+    if (vibePercent !== undefined) {
       snap.extra.push({
         label: 'Vibe plan',
-        usedPercent: vibeData.usagePercentage,
-        resetAt: vibeData.resetAt,
+        usedPercent: vibePercent,
+        resetAt: vibeData?.reset_at,
       });
     }
 
     return snap;
   }
 
-  private async fetchVibe(csrf: string | null): Promise<VibeUsageData | null> {
-    if (!csrf) return null;
+  private async fetchVibe(cookie: string, csrf: string | null): Promise<VibeUsageData | null> {
     const url =
       'https://console.mistral.ai/api-ui/trpc/billing.vibeUsage?batch=1&input=%7B%220%22%3A%7B%22json%22%3Anull%7D%7D';
     const data = await httpGetJson<Array<{ result?: { data?: { json?: VibeUsageData } } }>>(url, {
       headers: {
-        Cookie: `csrftoken=${csrf}`,
-        'X-CSRFToken': csrf,
+        Cookie: cookie,
+        ...(csrf ? { 'X-CSRFToken': csrf } : {}),
+        Referer: 'https://console.mistral.ai/codestral/cli',
       },
       timeoutMs: 4_000,
     });

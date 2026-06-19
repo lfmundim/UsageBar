@@ -29,35 +29,100 @@
         },
         "usagebar.display.showProviderLabel": {"type": "boolean", "default": true, "description": "Show provider name prefix in status bar items."},
         "usagebar.display.progressBarStyle": {"type": "string", "enum": ["blocks", "dots", "percent"], "default": "blocks", "description": "Visual style for usage progress in the status bar."},
-        "usagebar.providers.claude.enabled": {"type": "boolean", "default": true, "description": "Show Claude Code usage in the status bar."},
-        "usagebar.providers.claude.source": {"type": "string", "enum": ["auto", "oauth", "web", "cli"], "default": "auto", "description": "Auth/data source for Claude Code."},
-        "usagebar.providers.codex.enabled": {"type": "boolean", "default": true, "description": "Show OpenAI Codex CLI usage in the status bar."},
-        "usagebar.providers.codex.source": {"type": "string", "enum": ["auto", "oauth", "cli"], "default": "auto", "description": "Auth/data source for Codex."},
-        "usagebar.providers.mistral.enabled": {"type": "boolean", "default": true, "description": "Show Mistral usage in the status bar."},
-        "usagebar.providers.mistral.cookieSource": {"type": "string", "enum": ["auto", "manual"], "default": "auto", "description": "Cookie source for Mistral."},
-        "usagebar.providers.mistral.metric": {"type": "string", "enum": ["billing", "vibe"], "default": "billing", "description": "What to show in the Mistral status bar item: monthly billing spend or Vibe plan usage %."},
-        "usagebar.providers.deepseek.enabled": {"type": "boolean", "default": true, "description": "Show DeepSeek balance in the status bar."},
-        "usagebar.providers.antigravity.enabled": {"type": "boolean", "default": true, "description": "Show Antigravity quota in the status bar."},
-        "usagebar.providers.antigravity.source": {"type": "string", "enum": ["auto", "cli", "oauth"], "default": "auto", "description": "Auth/data source for Antigravity."},
-        "usagebar.providers.antigravity.group": {"type": "string", "enum": ["gemini", "claude"], "default": "gemini", "description": "Model group to display for Antigravity: 'gemini' or 'claude' (Claude + GPT)."},
+        "usagebar.providers.claude.enabled": {
+          "type": "boolean", "default": true,
+          "description": "Show Claude Code usage in the status bar."
+        },
+        "usagebar.providers.claude.source": {
+          "type": "string", "enum": ["auto", "oauth", "web", "cli"], "default": "auto",
+          "markdownDescription": "Auth/data source for Claude Code.\n\n- `auto`: tries oauth then cli\n- `web`: requires session cookie — run **[UsageBar: Set Claude Session Cookie](command:usagebar.setClaudeCookie)**",
+          "when": "config.usagebar.providers.claude.enabled"
+        },
+        "usagebar.providers.codex.enabled": {
+          "type": "boolean", "default": true,
+          "description": "Show OpenAI Codex CLI usage in the status bar."
+        },
+        "usagebar.providers.codex.source": {
+          "type": "string", "enum": ["auto", "oauth", "cli"], "default": "auto",
+          "description": "Auth/data source for Codex.",
+          "when": "config.usagebar.providers.codex.enabled"
+        },
+        "usagebar.providers.mistral.enabled": {
+          "type": "boolean", "default": true,
+          "description": "Show Mistral usage in the status bar."
+        },
+        "usagebar.providers.mistral.cookieSource": {
+          "type": "string", "enum": ["auto", "manual"], "default": "auto",
+          "markdownDescription": "Cookie source for Mistral.\n\n- `auto`: reads cookie from browser profile\n- `manual`: use a cookie you paste manually\n\n**To get the cookie:** open [console.mistral.ai/codestral/cli](https://console.mistral.ai/codestral/cli), open DevTools → Network tab, click any request, copy the full `Cookie:` header value. Then run **[UsageBar: Set Mistral Admin Cookie](command:usagebar.setMistralCookie)**.",
+          "when": "config.usagebar.providers.mistral.enabled"
+        },
+        "usagebar.providers.mistral.metric": {
+          "type": "string", "enum": ["billing", "vibe"], "default": "billing",
+          "description": "What to show in the Mistral status bar item: monthly billing spend or Vibe plan usage %.",
+          "when": "config.usagebar.providers.mistral.enabled"
+        },
+        "usagebar.providers.deepseek.enabled": {
+          "type": "boolean", "default": true,
+          "markdownDescription": "Show DeepSeek balance in the status bar.\n\n**API key required** — get yours at [platform.deepseek.com/usage](https://platform.deepseek.com/usage), then run **[UsageBar: Set DeepSeek API Key](command:usagebar.setDeepseekApiKey)**, or set the `DEEPSEEK_API_KEY` environment variable."
+        },
+        "usagebar.providers.antigravity.enabled": {
+          "type": "boolean", "default": true,
+          "description": "Show Antigravity quota in the status bar."
+        },
+        "usagebar.providers.antigravity.source": {
+          "type": "string", "enum": ["auto", "cli", "oauth"], "default": "auto",
+          "description": "Auth/data source for Antigravity.",
+          "when": "config.usagebar.providers.antigravity.enabled"
+        },
+        "usagebar.providers.antigravity.group": {
+          "type": "string", "enum": ["gemini", "claude"], "default": "gemini",
+          "description": "Model group to display for Antigravity: 'gemini' or 'claude' (Claude + GPT).",
+          "when": "config.usagebar.providers.antigravity.enabled"
+        },
         "usagebar.costTracking.enabled": {"type": "boolean", "default": false, "description": "Scan local JSONL session logs to compute daily token costs."},
         "usagebar.costTracking.historyDays": {"type": "number", "default": 30, "minimum": 1, "maximum": 365, "description": "Number of days of JSONL history to scan."}
       }
     },
-    "viewsContainers": {
-      "activitybar": [{"id": "usagebar-sidebar", "title": "UsageBar", "icon": "assets/sidebar-icon.svg"}]
-    },
-    "views": {
-      "usagebar-sidebar": [{"type": "webview", "id": "usagebar.settingsView", "name": "Settings", "visibility": "visible"}]
+    "icons": {
+      "usagebar-antigravity": {
+        "description": "Antigravity provider icon",
+        "default": { "fontPath": "./assets/icons-font/svgfont.woff2", "fontCharacter": "\\ea01" }
+      },
+      "usagebar-claude": {
+        "description": "Claude Code provider icon",
+        "default": { "fontPath": "./assets/icons-font/svgfont.woff2", "fontCharacter": "\\ea02" }
+      },
+      "usagebar-codex": {
+        "description": "OpenAI Codex CLI provider icon",
+        "default": { "fontPath": "./assets/icons-font/svgfont.woff2", "fontCharacter": "\\ea03" }
+      },
+      "usagebar-deepseek": {
+        "description": "DeepSeek provider icon",
+        "default": { "fontPath": "./assets/icons-font/svgfont.woff2", "fontCharacter": "\\ea04" }
+      },
+      "usagebar-mistral": {
+        "description": "Mistral provider icon",
+        "default": { "fontPath": "./assets/icons-font/svgfont.woff2", "fontCharacter": "\\ea05" }
+      }
     },
     "commands": [
-      {"command": "usagebar.refresh", "title": "UsageBar: Refresh All Providers"},
-      {"command": "usagebar.openSettings", "title": "UsageBar: Open Settings Panel"}
+      {"command": "usagebar.refresh",             "title": "UsageBar: Refresh All Providers"},
+      {"command": "usagebar.openSettings",         "title": "UsageBar: Open Settings"},
+      {"command": "usagebar.setClaudeCookie",      "title": "UsageBar: Set Claude Session Cookie"},
+      {"command": "usagebar.setMistralCookie",     "title": "UsageBar: Set Mistral Admin Cookie"},
+      {"command": "usagebar.setDeepseekApiKey",    "title": "UsageBar: Set DeepSeek API Key"},
+      {"command": "usagebar.setAntigravityToken",  "title": "UsageBar: Set Antigravity OAuth Token"},
+      {"command": "usagebar.clearSecrets",         "title": "UsageBar: Clear All Secrets"}
     ],
     "menus": {
       "commandPalette": [
         {"command": "usagebar.refresh"},
-        {"command": "usagebar.openSettings"}
+        {"command": "usagebar.openSettings"},
+        {"command": "usagebar.setClaudeCookie"},
+        {"command": "usagebar.setMistralCookie"},
+        {"command": "usagebar.setDeepseekApiKey"},
+        {"command": "usagebar.setAntigravityToken"},
+        {"command": "usagebar.clearSecrets"}
       ]
     }
   },
