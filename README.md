@@ -13,7 +13,7 @@ UsageBar is a VS Code extension that displays real-time usage metrics — quota 
 | Provider | What is tracked | Auth method |
 |---|---|---|
 | **Claude Code** (Anthropic) | Session %, weekly %, model-specific windows | OAuth credentials or CLI (`claude /usage`) |
-| **OpenAI Codex CLI** | 5-hour session %, weekly % | OAuth (`~/.codex/auth.json`) or CLI |
+| **OpenAI Codex CLI** | Monthly quota % | OAuth (`~/.codex/auth.json`) or CLI |
 | **Mistral** | Vibe plan quota % or monthly billing spend | Browser session cookie (auto-imported or manual) |
 | **DeepSeek** | API credit balance | API key (`DEEPSEEK_API_KEY` env or VS Code secret) |
 | **Antigravity** (Google Cloud Code) | Gemini + Claude/GPT quota %, reset times | Local language server, or OAuth via `antigravity-usage` |

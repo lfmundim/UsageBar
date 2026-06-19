@@ -23,7 +23,7 @@ Usage endpoint: `https://api.anthropic.com/api/oauth/usage`
 
 | Strategy | How |
 |----------|-----|
-| **OAuth (primary)** | Reads `~/.codex/auth.json` → access + refresh token. Auto-refreshes via `https://chatgpt.com/backend-api/auth/session` if token is older than 8 days. |
+| **OAuth (primary)** | Reads `~/.codex/auth.json` → `tokens.access_token` + `tokens.refresh_token`. Auto-refreshes via `https://chatgpt.com/backend-api/auth/session` if token is older than 8 days. |
 | **CLI PTY (fallback)** | Spawns `codex` binary in sandbox mode (`-s read-only -a untrusted app-server`) and reads JSON from its stdio. |
 
 Usage endpoint: `https://chatgpt.com/backend-api/wham/usage`

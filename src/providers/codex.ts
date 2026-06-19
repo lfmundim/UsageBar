@@ -18,23 +18,19 @@ interface CodexAuth {
 
 interface WhamUsageResponse {
   rate_limit?: {
-    primary_window?: RateLimitWindow;
-    secondary_window?: RateLimitWindow;
-    additional_rate_limits?: RateLimitWindow[];
+    primary_window?: WhamRateLimitWindow | null;
+    secondary_window?: WhamRateLimitWindow | null;
   };
-  account?: {
-    email?: string;
-    subscription_type?: string;
-    has_credits?: boolean;
-    credits_balance?: string;
-  };
+  additional_rate_limits?: WhamRateLimitWindow[] | null;
+  credits?: {
+    balance?: number | null;
+  } | null;
 }
 
-interface RateLimitWindow {
-  name: string;
-  used_requests: number;
-  max_requests: number;
-  reset_at?: string;
+interface WhamRateLimitWindow {
+  used_percent?: number;
+  limit_window_seconds?: number;
+  reset_at?: number; // Unix timestamp (seconds)
 }
 
 export class CodexProvider implements ProviderInterface {
@@ -91,25 +87,27 @@ export class CodexProvider implements ProviderInterface {
   private parseWhamResponse(data: WhamUsageResponse): UsageSnapshot {
     const snap = emptySnapshot(PROVIDER_ID, 'oauth');
     const rl = data.rate_limit;
-    if (!rl) return snap;
 
-    if (rl.primary_window) {
-      snap.primary = limitWindowToRateWindow(rl.primary_window);
+    const toRateWindow = (w: WhamRateLimitWindow): RateWindow => ({
+      label: windowLabel(w.limit_window_seconds),
+      usedPercent: w.used_percent !== undefined ? Math.min(100, Math.max(0, w.used_percent)) : undefined,
+      resetAt: w.reset_at !== undefined ? new Date(w.reset_at * 1000).toISOString() : undefined,
+    });
+
+    if (rl?.primary_window) {
+      snap.primary = toRateWindow(rl.primary_window);
     }
-    if (rl.secondary_window) {
-      const rw = limitWindowToRateWindow(rl.secondary_window);
+    if (rl?.secondary_window) {
+      const rw = toRateWindow(rl.secondary_window);
       if (snap.primary) snap.secondary = rw;
       else snap.primary = rw;
     }
-    for (const extra of rl.additional_rate_limits ?? []) {
-      snap.extra.push(limitWindowToRateWindow(extra));
+    for (const extra of (data.additional_rate_limits ?? [])) {
+      snap.extra.push(toRateWindow(extra));
     }
 
-    const acct = data.account;
-    if (acct?.credits_balance) {
-      const bal = parseFloat(acct.credits_balance);
-      if (!isNaN(bal)) snap.balanceUsd = bal;
-    }
+    const bal = data.credits?.balance;
+    if (bal !== null && bal !== undefined) snap.balanceUsd = bal;
 
     return snap;
   }
@@ -119,6 +117,15 @@ export class CodexProvider implements ProviderInterface {
     try {
       const raw = fs.readFileSync(authPath, 'utf8');
       const parsed = JSON.parse(raw);
+      // New codex CLI format: tokens nested under "tokens" key
+      if (parsed?.tokens?.access_token) {
+        return {
+          access_token: parsed.tokens.access_token,
+          refresh_token: parsed.tokens.refresh_token ?? '',
+          last_refresh: parsed.last_refresh ?? new Date(0).toISOString(),
+        };
+      }
+      // Legacy flat format
       if (parsed?.access_token) return parsed as CodexAuth;
     } catch { /* file absent */ }
     return null;
@@ -247,14 +254,11 @@ export class CodexProvider implements ProviderInterface {
   }
 }
 
-// --- Helpers ---
-
-function limitWindowToRateWindow(w: RateLimitWindow): RateWindow {
-  return {
-    label: w.name,
-    usedPercent: w.max_requests > 0
-      ? Math.min(100, (w.used_requests / w.max_requests) * 100)
-      : undefined,
-    resetAt: w.reset_at,
-  };
+function windowLabel(seconds?: number): string {
+  if (!seconds) return 'Quota';
+  if (seconds <= 3_600) return 'Hourly';
+  if (seconds <= 21_600) return `${Math.round(seconds / 3600)}h`;
+  if (seconds <= 86_400) return 'Daily';
+  if (seconds <= 604_800) return 'Weekly';
+  return 'Monthly';
 }
