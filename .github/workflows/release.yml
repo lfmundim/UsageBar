@@ -1,19 +1,21 @@
 name: Release
 
 on:
-  push:
-    tags:
-      - 'v*'
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
 
 jobs:
   release:
     runs-on: ubuntu-latest
-    if: github.event.base_ref == 'refs/heads/main'
+    if: github.event.workflow_run.conclusion == 'success'
     permissions:
       contents: write
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: ${{ github.event.workflow_run.head_sha }}
           fetch-depth: 0
 
       - name: Setup Node.js
@@ -28,7 +30,10 @@ jobs:
         run: npm run compile
 
       - name: Compute version
-        run: bash scripts/compute-version.sh
+        id: ver
+        run: |
+          bash scripts/compute-version.sh
+          echo "version=$(node -e "console.log(require('./package.json').version)")" >> "$GITHUB_OUTPUT"
 
       - name: Package VSIX
         run: npx vsce package --no-dependencies
@@ -36,5 +41,6 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: v${{ steps.ver.outputs.version }}
           files: '*.vsix'
           generate_release_notes: true

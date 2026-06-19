@@ -1,18 +1,31 @@
 name: Publish
 
 on:
-  push:
-    tags:
-      - 'v*'
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
 
 jobs:
   check-secrets:
     runs-on: ubuntu-latest
-    if: github.event.base_ref == 'refs/heads/main'
+    if: github.event.workflow_run.conclusion == 'success'
     outputs:
       has_vsce_token: ${{ steps.check.outputs.has_vsce_token }}
       has_ovsx_token: ${{ steps.check.outputs.has_ovsx_token }}
+      version: ${{ steps.ver.outputs.version }}
     steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 0
+
+      - name: Compute version
+        id: ver
+        run: |
+          bash scripts/compute-version.sh
+          echo "version=$(node -e "console.log(require('./package.json').version)")" >> "$GITHUB_OUTPUT"
+
       - name: Check required secrets
         id: check
         run: |
@@ -23,11 +36,14 @@ jobs:
     needs: check-secrets
     runs-on: ubuntu-latest
     if: needs.check-secrets.outputs.has_vsce_token == 'false' || needs.check-secrets.outputs.has_ovsx_token == 'false'
+    permissions:
+      issues: write
     steps:
       - name: Create issue for missing secrets
         uses: actions/github-script@v7
         with:
           script: |
+            const version = '${{ needs.check-secrets.outputs.version }}';
             const missing = [];
             if ('${{ needs.check-secrets.outputs.has_vsce_token }}' === 'false') {
               missing.push('- `VSCE_TOKEN` — VS Code Marketplace Personal Access Token. Get it at https://marketplace.visualstudio.com/manage (Publisher → Personal Access Tokens). Needs scope: **Marketplace → Manage**.');
@@ -39,7 +55,7 @@ jobs:
             const body = [
               `## 🔐 Missing secrets for publish workflow`,
               ``,
-              `The publish workflow triggered by tag \`${{ github.ref_name }}\` cannot complete because the following repository secrets are missing:`,
+              `The publish workflow for \`v${version}\` cannot complete because the following repository secrets are missing:`,
               ``,
               ...missing,
               ``,
@@ -71,7 +87,7 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: issues.data[0].number,
-                body: `Re-triggered on tag \`${{ github.ref_name }}\`. Secrets still missing:\n\n` + missing.join('\n'),
+                body: `Re-triggered for \`v${version}\`. Secrets still missing:\n\n` + missing.join('\n'),
               });
             }
 
@@ -82,6 +98,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: ${{ github.event.workflow_run.head_sha }}
           fetch-depth: 0
 
       - name: Setup Node.js
@@ -110,6 +127,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: ${{ github.event.workflow_run.head_sha }}
           fetch-depth: 0
 
       - name: Setup Node.js

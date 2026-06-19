@@ -9,8 +9,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -40,11 +38,7 @@ jobs:
         run: npx vsce ls --no-dependencies
 
       - name: Compute version
-        id: ver
-        run: |
-          bash scripts/compute-version.sh
-          VERSION=$(node -e "console.log(require('./package.json').version)")
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+        run: bash scripts/compute-version.sh
 
       - name: Package extension
         run: npx vsce package --no-dependencies
@@ -55,17 +49,3 @@ jobs:
           name: usagebar-vsix
           path: '*.vsix'
           retention-days: 14
-
-      - name: Tag release
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        env:
-          TAG: v${{ steps.ver.outputs.version }}
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          if git rev-parse "$TAG" >/dev/null 2>&1; then
-            echo "Tag $TAG already exists, skipping"
-          else
-            git tag "$TAG"
-            git push origin "$TAG"
-          fi
