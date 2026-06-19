@@ -1,0 +1,42 @@
+# Node / npm
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# Build output
+out/
+dist/
+*.vsix
+
+# TypeScript
+*.js.map
+*.d.ts.map
+
+# VS Code extension testing
+.vscode-test/
+.vscode/settings.json
+.vscode/launch.json
+.vscode/tasks.json
+.vscode/extensions.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env / secrets
+.env
+.env.local
+*.local
+
+# Coverage
+coverage/
+.nyc_output/
+
+# Misc
+*.log
+.cache/
+tmp/
+temp/

@@ -1,0 +1,123 @@
+name: Publish
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  check-secrets:
+    runs-on: ubuntu-latest
+    outputs:
+      has_vsce_token: ${{ steps.check.outputs.has_vsce_token }}
+      has_ovsx_token: ${{ steps.check.outputs.has_ovsx_token }}
+    steps:
+      - name: Check required secrets
+        id: check
+        run: |
+          echo "has_vsce_token=${{ secrets.VSCE_TOKEN != '' }}" >> $GITHUB_OUTPUT
+          echo "has_ovsx_token=${{ secrets.OVSX_PAT != '' }}" >> $GITHUB_OUTPUT
+
+  warn-missing-secrets:
+    needs: check-secrets
+    runs-on: ubuntu-latest
+    if: needs.check-secrets.outputs.has_vsce_token == 'false' || needs.check-secrets.outputs.has_ovsx_token == 'false'
+    steps:
+      - name: Create issue for missing secrets
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const missing = [];
+            if ('${{ needs.check-secrets.outputs.has_vsce_token }}' === 'false') {
+              missing.push('- `VSCE_TOKEN` — VS Code Marketplace Personal Access Token. Get it at https://marketplace.visualstudio.com/manage (Publisher → Personal Access Tokens). Needs scope: **Marketplace → Manage**.');
+            }
+            if ('${{ needs.check-secrets.outputs.has_ovsx_token }}' === 'false') {
+              missing.push('- `OVSX_PAT` — Open VSX Registry token (optional, for publishing to open-vsx.org). Get it at https://open-vsx.org/user-settings/tokens.');
+            }
+
+            const body = [
+              `## 🔐 Missing secrets for publish workflow`,
+              ``,
+              `The publish workflow triggered by tag \`${{ github.ref_name }}\` cannot complete because the following repository secrets are missing:`,
+              ``,
+              ...missing,
+              ``,
+              `### How to add secrets`,
+              `1. Go to **Settings → Secrets and variables → Actions** in this repository`,
+              `2. Click **New repository secret** for each missing secret above`,
+              `3. Re-run the publish workflow after adding the secrets`,
+              ``,
+              `_This issue was created automatically by the publish workflow._`,
+            ].join('\n');
+
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'ci,secrets',
+            });
+
+            if (issues.data.length === 0) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: '🔐 Action required: add missing secrets for publish workflow',
+                body,
+                labels: ['ci', 'secrets'],
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issues.data[0].number,
+                body: `Re-triggered on tag \`${{ github.ref_name }}\`. Secrets still missing:\n\n` + missing.join('\n'),
+              });
+            }
+
+  publish-vscode:
+    needs: check-secrets
+    runs-on: ubuntu-latest
+    if: needs.check-secrets.outputs.has_vsce_token == 'true'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Compile
+        run: npm run compile
+
+      - name: Publish to VS Code Marketplace
+        run: npx vsce publish --no-dependencies
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_TOKEN }}
+
+  publish-ovsx:
+    needs: check-secrets
+    runs-on: ubuntu-latest
+    if: needs.check-secrets.outputs.has_ovsx_token == 'true'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Compile
+        run: npm run compile
+
+      - name: Publish to Open VSX
+        run: npx ovsx publish --no-dependencies
+        env:
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
