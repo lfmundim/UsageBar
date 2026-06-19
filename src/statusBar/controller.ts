@@ -34,10 +34,9 @@ export class StatusBarController implements vscode.Disposable {
         PROVIDER_PRIORITIES[provider.id] ?? 100,
       );
       const icon = PROVIDER_ICONS[provider.id] ?? 'symbol-misc';
-      item.command = 'usagebar.openSettings';
+      item.command = { command: 'usagebar.showDetail', title: 'Show detail', arguments: [provider.id] };
       item.name = `UsageBar — ${provider.displayName}`;
       item.text = `$(sync~spin) $(${icon}) ${provider.displayName}`;
-      item.show();
       this.items.set(provider.id, item);
     }
 

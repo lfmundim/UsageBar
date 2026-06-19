@@ -80,21 +80,12 @@ export class MistralProvider implements ProviderInterface {
     const vibePercent = typeof vibeData?.usage_percentage === 'number' ? vibeData.usage_percentage : undefined;
 
     if (metric === 'vibe' && vibePercent !== undefined) {
-      snap.primary = {
-        label: 'Vibe plan',
-        usedPercent: vibePercent,
-        resetAt: vibeData?.reset_at,
-      };
+      snap.primary = { label: 'Vibe plan', usedPercent: vibePercent, resetAt: vibeData?.reset_at };
     } else {
       snap.primary = undefined;
-    }
-
-    if (vibePercent !== undefined) {
-      snap.extra.push({
-        label: 'Vibe plan',
-        usedPercent: vibePercent,
-        resetAt: vibeData?.reset_at,
-      });
+      if (vibePercent !== undefined) {
+        snap.extra.push({ label: 'Vibe plan', usedPercent: vibePercent, resetAt: vibeData?.reset_at });
+      }
     }
 
     return snap;

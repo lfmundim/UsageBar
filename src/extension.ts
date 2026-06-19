@@ -3,6 +3,7 @@ import { ProviderRegistry } from './providers/registry';
 import { UsageStore } from './store/usageStore';
 import { SecretStore } from './util/secrets';
 import { StatusBarController } from './statusBar/controller';
+import { showProviderDetail } from './statusBar/detail';
 import { ClaudeProvider } from './providers/claude';
 import { CodexProvider } from './providers/codex';
 import { MistralProvider } from './providers/mistral';
@@ -48,6 +49,14 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     vscode.commands.registerCommand('usagebar.openSettings', () =>
       vscode.commands.executeCommand('workbench.action.openSettings', 'usagebar'),
     ),
+    vscode.commands.registerCommand('usagebar.showDetail', (providerId: string) =>
+      showProviderDetail(providerId, store, registry),
+    ),
+    vscode.commands.registerCommand('usagebar.toggleMistralMetric', async () => {
+      const cfg     = vscode.workspace.getConfiguration('usagebar');
+      const current = cfg.get<string>('providers.mistral.metric', 'billing');
+      await cfg.update('providers.mistral.metric', current === 'vibe' ? 'billing' : 'vibe', vscode.ConfigurationTarget.Global);
+    }),
     vscode.commands.registerCommand('usagebar.setClaudeCookie', () =>
       promptSecret('claude.sessionCookie', 'Paste Claude session cookie (web source)', 'sk-ant-sid...'),
     ),

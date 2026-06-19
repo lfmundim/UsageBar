@@ -33,6 +33,11 @@
           "type": "boolean", "default": true,
           "description": "Show Claude Code usage in the status bar."
         },
+        "usagebar.providers.claude.showExtras": {
+          "type": "boolean", "default": true,
+          "description": "Show extra quota windows (Opus, Sonnet, Routines) in the provider detail popup.",
+          "when": "config.usagebar.providers.claude.enabled"
+        },
         "usagebar.providers.claude.source": {
           "type": "string", "enum": ["auto", "oauth", "web", "cli"], "default": "auto",
           "markdownDescription": "Auth/data source for Claude Code.\n\n- `auto`: tries oauth then cli\n- `web`: requires session cookie — run **[UsageBar: Set Claude Session Cookie](command:usagebar.setClaudeCookie)**",
@@ -50,6 +55,11 @@
         "usagebar.providers.mistral.enabled": {
           "type": "boolean", "default": true,
           "description": "Show Mistral usage in the status bar."
+        },
+        "usagebar.providers.mistral.showBillingInDetail": {
+          "type": "boolean", "default": true,
+          "description": "Show billing spend row in the Mistral detail popup (alongside the vibe quota).",
+          "when": "config.usagebar.providers.mistral.enabled"
         },
         "usagebar.providers.mistral.cookieSource": {
           "type": "string", "enum": ["auto", "manual"], "default": "auto",
@@ -78,9 +88,7 @@
           "type": "string", "enum": ["gemini", "claude"], "default": "gemini",
           "description": "Model group to display for Antigravity: 'gemini' or 'claude' (Claude + GPT).",
           "when": "config.usagebar.providers.antigravity.enabled"
-        },
-        "usagebar.costTracking.enabled": {"type": "boolean", "default": false, "description": "Scan local JSONL session logs to compute daily token costs."},
-        "usagebar.costTracking.historyDays": {"type": "number", "default": 30, "minimum": 1, "maximum": 365, "description": "Number of days of JSONL history to scan."}
+        }
       }
     },
     "icons": {
@@ -106,8 +114,10 @@
       }
     },
     "commands": [
-      {"command": "usagebar.refresh",             "title": "UsageBar: Refresh All Providers"},
-      {"command": "usagebar.openSettings",         "title": "UsageBar: Open Settings"},
+      {"command": "usagebar.refresh",              "title": "UsageBar: Refresh All Providers"},
+      {"command": "usagebar.openSettings",          "title": "UsageBar: Open Settings"},
+      {"command": "usagebar.showDetail",            "title": "UsageBar: Show Provider Detail"},
+      {"command": "usagebar.toggleMistralMetric",   "title": "UsageBar: Toggle Mistral Vibe / Billing"},
       {"command": "usagebar.setClaudeCookie",      "title": "UsageBar: Set Claude Session Cookie"},
       {"command": "usagebar.setMistralCookie",     "title": "UsageBar: Set Mistral Admin Cookie"},
       {"command": "usagebar.setDeepseekApiKey",    "title": "UsageBar: Set DeepSeek API Key"},
@@ -118,6 +128,8 @@
       "commandPalette": [
         {"command": "usagebar.refresh"},
         {"command": "usagebar.openSettings"},
+        {"command": "usagebar.showDetail"},
+        {"command": "usagebar.toggleMistralMetric"},
         {"command": "usagebar.setClaudeCookie"},
         {"command": "usagebar.setMistralCookie"},
         {"command": "usagebar.setDeepseekApiKey"},

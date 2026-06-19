@@ -50,7 +50,7 @@ export class DeepSeekProvider implements ProviderInterface {
     const selected = selectCurrency(balance.balance_infos);
 
     if (selected) {
-      const total = parseFloat(selected.total_balance);
+      const total    = parseFloat(selected.total_balance);
       snap.balanceUsd = isNaN(total) ? 0 : total;
 
       // Store availability as a special extra window (not a rate window but used for tooltip)

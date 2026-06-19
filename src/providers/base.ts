@@ -8,15 +8,6 @@ export interface RateWindow {
   resetAt: string | undefined;
 }
 
-/** Cost data for a single day. */
-export interface DailyCost {
-  /** ISO date, e.g. "2025-06-15" */
-  date: string;
-  costUsd: number;
-  inputTokens: number;
-  outputTokens: number;
-}
-
 /** Snapshot of usage data returned by a provider fetch. */
 export interface UsageSnapshot {
   providerId: string;
@@ -28,8 +19,8 @@ export interface UsageSnapshot {
   extra: RateWindow[];
   /** Current credit/token balance. undefined = not applicable. */
   balanceUsd: number | undefined;
-  /** Daily cost history from local log scanning. */
-  dailyCosts: DailyCost[];
+  /** Total capacity for balance (topped-up + granted). Enables a "used" progress bar. */
+  capacityUsd: number | undefined;
   /** Human-readable source label, e.g. "oauth", "cli", "web". */
   sourceLabel: string;
   /** When this snapshot was fetched. */
@@ -54,7 +45,7 @@ export function emptySnapshot(providerId: string, sourceLabel: string): UsageSna
     secondary: undefined,
     extra: [],
     balanceUsd: undefined,
-    dailyCosts: [],
+    capacityUsd: undefined,
     sourceLabel,
     fetchedAt: new Date(),
   };
