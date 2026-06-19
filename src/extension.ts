@@ -5,6 +5,7 @@ import { SecretStore } from './util/secrets';
 import { ClaudeProvider } from './providers/claude';
 import { CodexProvider } from './providers/codex';
 import { MistralProvider } from './providers/mistral';
+import { DeepSeekProvider } from './providers/deepseek';
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
   const registry = new ProviderRegistry();
@@ -20,6 +21,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   registry.register(new ClaudeProvider(secretStore));
   registry.register(new CodexProvider(secretStore));
   registry.register(new MistralProvider(secretStore));
+  registry.register(new DeepSeekProvider(secretStore));
   store.registerProviders(registry.getAll());
 
   // Re-start timer when refresh interval config changes
