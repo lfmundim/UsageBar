@@ -1,7 +1,6 @@
 # UsageBar
 [![Visual Studio Marketplace Version](https://vsmarketplacebadges.dev/version/kimdim.usagebar.svg)](https://marketplace.visualstudio.com/items?itemName=kimdim.usagebar)
-[![Visual Studio Marketplace Installs](https://vsmarketplacebadges.dev/installs/kimdim.usagebar.svg)](https://marketplace.visualstudio.com/items?itemName=kimdim.usagebar)
-[![Visual Studio Marketplace Rating](https://vsmarketplacebadges.dev/rating-star/kimdim.usagebar.svg)](https://marketplace.visualstudio.com/items?itemName=kimdim.usagebar)
+[![OpenVSX Version](https://img.shields.io/open-vsx/v/kimdim/usagebar)]
 
 <p align="center">
   <img src="logo.png" alt="Logo" width="30%" />
