@@ -182,6 +182,7 @@ npm run compile
 ## Credits
 
 - [CodexBar](https://github.com/steipete/CodexBar) by [@steipete](https://github.com/steipete) — the macOS menu bar app that inspired this project. Provider integration logic, API endpoints, auth strategies, and data parsing approaches in UsageBar are directly derived from studying CodexBar's open-source implementation.
+- [antigravity-usage](https://github.com/skainguyen1412/antigravity-usage) by [@skainguyen1412](https://github.com/skainguyen1412) — CLI tool that handles Google Cloud Code OAuth for Antigravity. UsageBar reads its stored credentials and delegates token refresh to it.
 
 ---
 
